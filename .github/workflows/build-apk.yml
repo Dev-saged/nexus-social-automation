@@ -20,15 +20,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Setup Gradle Wrapper & Build Debug APK
+      - name: Accept Android SDK Licenses & Build Debug APK
         working-directory: ./android-apk
         run: |
-          gradle wrapper --gradle-version 8.5
-          chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          if [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          fi
+          gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload Compiled Nexus Social APK Artifact
         uses: actions/upload-artifact@v4

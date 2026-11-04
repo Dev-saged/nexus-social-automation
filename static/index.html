@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Nexus Social APK — مركز الأتمتة الشامل</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-border: #1e293b;
+      --accent: #3b82f6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 80px; line-height: 1.5; }
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(19, 27, 46, 0.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border); padding: 12px 16px;
+    }
+    .top-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .brand { font-size: 1.1rem; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px; }
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .badge.online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+    .badge.offline { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #dc2626; }
+    .mode-bar {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px;
+      background: #090d16; padding: 4px; border-radius: 10px; border: 1px solid var(--card-border);
+    }
+    .mode-btn {
+      background: transparent; color: var(--muted); border: none; padding: 8px 6px;
+      border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .mode-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.4); }
+    .container { max-width: 960px; margin: 0 auto; padding: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media(min-width: 640px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; color: #fff; }
+    .stat-lbl { font-size: 0.78rem; color: var(--muted); }
+    .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+    .card h3 { font-size: 1rem; margin-bottom: 12px; color: #93c5fd; display: flex; justify-content: space-between; align-items: center; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; background: #090d16; border: 1px solid var(--card-border);
+      color: #fff; padding: 9px 11px; border-radius: 8px; font-size: 0.88rem;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .btn {
+      background: var(--accent); color: #fff; border: none; padding: 9px 14px;
+      border-radius: 8px; font-size: 0.84rem; font-weight: 700; cursor: pointer;
+    }
+    .btn.green { background: var(--accent-green); }
+    .btn.amber { background: var(--accent-amber); color: #000; }
+    .btn.red { background: var(--accent-red); }
+    .btn.outline { background: transparent; border: 1px solid var(--card-border); color: var(--text); }
+    .platforms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media(min-width: 640px) { .platforms-grid { grid-template-columns: repeat(4, 1fr); } }
+    .plat-btn {
+      background: #0d1322; border: 1px solid var(--card-border); color: #e2e8f0;
+      padding: 10px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;
+      text-align: center; cursor: pointer; transition: 0.15s;
+    }
+    .plat-btn:hover { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+    .bottom-nav {
+      position: fixed; bottom: 0; right: 0; left: 0; z-index: 50;
+      background: rgba(15, 23, 42, 0.98); border-top: 1px solid var(--card-border);
+      display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 4px;
+    }
+    .nav-item {
+      background: none; border: none; color: var(--muted); font-size: 0.72rem;
+      font-weight: 700; padding: 6px 2px; cursor: pointer; text-align: center;
+    }
+    .nav-item.active { color: #60a5fa; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .list-item {
+      background: #090d16; border: 1px solid var(--card-border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 8px; font-size: 0.84rem;
+    }
+    .log-box {
+      background: #050811; border: 1px solid #1e293b; border-radius: 10px;
+      padding: 10px; font-family: monospace; font-size: 0.76rem; color: #38bdf8;
+      max-height: 210px; overflow-y: auto; direction: ltr; text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="top-row">
+    <div class="brand">🚀 Nexus Social APK v2.0</div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <span id="netBadge" class="badge online">متصل بالشبكة</span>
+      <button class="btn green" style="padding:5px 10px; font-size:0.75rem;" onclick="triggerWakeup()">⚡ استدراك فوري</button>
+    </div>
+  </div>
+  <div class="mode-bar">
+    <button class="mode-btn" id="mode_FULL_AUTO" onclick="setMode('FULL_AUTO')">🤖 تلقائي كامل 100%</button>
+    <button class="mode-btn active" id="mode_SMART_HYBRID" onclick="setMode('SMART_HYBRID')">⚡ هجين ذكي (موصى به)</button>
+    <button class="mode-btn" id="mode_APPROVAL_QUEUE" onclick="setMode('APPROVAL_QUEUE')">✋ مراجعة قبل النشر</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val" id="stAccounts">0</div><div class="stat-lbl">حسابات مربوطة (12 منصة)</div></div>
+    <div class="stat-card"><div class="stat-val" id="stPending">0</div><div class="stat-lbl">في طابور النشر</div></div>
+    <div class="stat-card"><div class="stat-val" id="stInbox">0</div><div class="stat-lbl">تعليقات/رسائل للمراجعة</div></div>
+    <div class="stat-card"><div class="stat-val" id="stReplies">0</div><div class="stat-lbl">ردود تلقائية مجدولة</div></div>
+  </div>
+
+  <!-- TAB 1: CREATION & 13 AI SKILLS -->
+  <div id="tab_create" class="tab-pane active">
+    <div class="card">
+      <h3>🎬 الإنشاء الفوري وإنتاج الفيديو الذكي (Pexels + TTS + FFmpeg Uniquify)</h3>
+      <div class="form-grid">
+        <div>
+          <label>نوع الإنتاج</label>
+          <select id="crMediaKind">
+            <option value="none">منشور نصي SEO</option>
+            <option value="image">منشور مع صورة بالذكاء الاصطناعي (Flux)</option>
+            <option value="video">فيديو ريلز/شورتس كامل (سكريبت + صوت + مونتاج)</option>
+          </select>
+        </div>
+        <div>
+          <label>مقاس الفيديو وفلتر المحتوى</label>
+          <select id="crAspect">
+            <option value="9:16">9:16 (Reels / Shorts / TikTok)</option>
+            <option value="16:9">16:9 (YouTube / LinkedIn)</option>
+            <option value="1:1">1:1 (بوست مربع)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:14px; margin-bottom:10px; font-size:0.82rem; flex-wrap:wrap;">
+        <label><input type="checkbox" id="crAvoidWomen" checked style="width:auto;" /> تفعيل فلتر تجنب النساء الصارم (Avoid-Women Filter)</label>
+        <label><input type="checkbox" id="crTrialReel" style="width:auto;" /> نشر كـ Trial Reel (لغير المتابعين)</label>
+        <label><input type="checkbox" id="crPublishNow" style="width:auto;" /> نشر فوري بعد الإنشاء</label>
+      </div>
+      <label>المواضيع / الأفكار (موضوع واحد أو عدة مواضيع كل موضوع في سطر لإنتاج الطابور)</label>
+      <textarea id="crTopics" placeholder="مثال:&#10;التخطيط لرحلة المليون دولار في المشاريع التقنية&#10;كيف تبني نظام أتمتة مجاني يعمل من جوالك"></textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="scheduleBatchPosts()">➕ إضافة إلى طابور المنشورات</button>
+        <button class="btn green" onclick="generateAutoVideo()">🎬 توليد فيديو كامل (Pexels + صوت بشري)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🧠 استوديو المهارات الـ 13 (Instagram Agent Nadr.ai + بصمة صوتك voice.md)</h3>
+      <div class="form-grid">
+        <div>
+          <label>اختر المهارة</label>
+          <select id="skName">
+            <option value="ig-reel">/ig-reel — كاتب الريلز (3 هوكات مقيمة من 26 قالب + سكريبت)</option>
+            <option value="ig-caption">/ig-caption — كاتب وفاحص الكابشن (أول 125 حرفاً + CTA)</option>
+            <option value="ig-repurpose">/ig-repurpose — تحويل فيديو يوتيوب/مقال لأسبوع محتوى</option>
+            <option value="ig-carousel">/ig-carousel — صانع الكاروسيل 7 شرائح (1080×1350)</option>
+            <option value="ig-story">/ig-story — سلسلة ستوريات اليوم + قمع الـ DM</option>
+            <option value="ig-plan">/ig-plan — مخطط الأسبوع + 10 حسابات للتفاعل</option>
+            <option value="ig-profile">/ig-profile — مقيّم البروفايل من 100 على 12 معياراً</option>
+            <option value="ig-audit">/ig-audit — محلل الأداء ونسبة التخطي في أول 3 ثوانٍ</option>
+          </select>
+        </div>
+        <div>
+          <label>منظف بصمة الـ AI (/ig-human)</label>
+          <input type="text" value="مفعّل تلقائياً (يحذف الشرطات الطويلة والكليشيهات)" disabled />
+        </div>
+      </div>
+      <textarea id="skInput" placeholder="أدخل فكرتك أو الصق نص فيديو يوتيوب أو إحصائيات ريلزاتك هنا..."></textarea>
+      <div class="btn-row">
+        <button class="btn amber" onclick="runSkillStudio()">✨ تشغيل المهارة عبر موزع الـ AI المجاني</button>
+      </div>
+      <pre id="skOutput" style="margin-top:10px; white-space:pre-wrap; font-size:0.84rem; color:#e2e8f0; background:#090d16; padding:10px; border-radius:8px; display:none;"></pre>
+    </div>
+  </div>
+
+  <!-- TAB 2: QUEUES & ANTI-BAN SCHEDULER -->
+  <div id="tab_queues" class="tab-pane">
+    <div class="card">
+      <h3>📋 طابور المنشورات والفيديو (تحكم كامل)</h3>
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn outline" onclick="loadQueues()">🔄 تحديث</button>
+        <button class="btn red" onclick="queueAction('clear_all', null)">🗑️ مسح الكل</button>
+      </div>
+      <div id="queueList">جاري التحميل...</div>
+    </div>
+    <div class="card">
+      <h3>⏰ المجدول التمويهي لمنع الحظر (Anti-Ban Jitter ±15m)</h3>
+      <div id="plannedSlots" style="font-family:monospace; color:#34d399; font-size:0.86rem;"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: UNIFIED INBOX & OPENREPLY COMMENT-TO-DM -->
+  <div id="tab_inbox" class="tab-pane">
+    <div class="card">
+      <h3>💬 إضافة قاعدة رد تلقائي عربي (Bulldozer OpenReply Comment-to-DM)</h3>
+      <div class="form-grid">
+        <div><label>الكلمات المفتاحية (يدعم التطبيع العربي التلقائي)</label><input id="rlKeywords" value="تفاصيل, السعر, الرابط, ابعتلي" /></div>
+        <div><label>الرابط المرسل في الخاص (DM Link)</label><input id="rlLink" placeholder="https://..." /></div>
+      </div>
+      <label>الردود العامة العشوائية تحت التعليق (افصل بينها بـ |)</label>
+      <input id="rlPublic" value="تم إرسال كافة التفاصيل لك في الخاص ✨ | شيك على الرسائل الخاصة بعتلك الرابط 📩" style="margin-bottom:8px;" />
+      <label>نص الرسالة الخاصة (DM Text)</label>
+      <input id="rlDm" value="أهلاً بك! تفضل كافة التفاصيل والرابط المباشر الذي طلبته:" />
+      <div class="btn-row">
+        <button class="btn green" onclick="saveReplyRule()">💾 حفظ قاعدة الرد التلقائي</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📥 صندوق التفاعل الموحد (مصنف بـ /ig-reply حسب الأولوية)</h3>
+      <div id="inboxList">لا توجد تعليقات معلقة حالياً.</div>
+    </div>
+  </div>
+
+  <!-- TAB 4: AGENT-REACH RADAR & TARGET ENGAGEMENT -->
+  <div id="tab_radar" class="tab-pane">
+    <div class="card">
+      <h3>👁️ رادار Agent-Reach (قراءة بوستات الحسابات المستهدفة والترند بصفر رسوم API)</h3>
+      <div class="form-grid">
+        <div>
+          <label>المنصة</label>
+          <select id="tgPlatform">
+            <option value="instagram">Instagram</option>
+            <option value="x_twitter">X (Twitter)</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="youtube">YouTube</option>
+            <option value="reddit">Reddit</option>
+            <option value="threads">Threads</option>
+          </select>
+        </div>
+        <div>
+          <label>اسم الحساب أو الكلمة المفتاحية</label>
+          <input id="tgHandle" placeholder="مثال: AI automation أو @username" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="addTarget()">➕ إضافة للرادار</button>
+        <button class="btn green" onclick="scanTargetsNow()">🔍 فحص البوستات الآن وتوليد تعليقات (/ig-comment)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔥 البوستات المرصودة ومضاعف الانتشار (Outlier Multiplier >3x)</h3>
+      <div id="radarList">اضغط "فحص البوستات الآن" لقراءة أحدث المنشورات واقتراح تعليقات ذكية عليها.</div>
+    </div>
+  </div>
+
+  <!-- TAB 5: ONE-TAP 12 ACCOUNTS LINKER & 9 FREE AI PROVIDERS -->
+  <div id="tab_accounts" class="tab-pane">
+    <div class="card">
+      <h3>🔗 ربط حساباتك الخاصة بضغطة زر (Android WebView Session Bridge — 12 منصة)</h3>
+      <p style="font-size:0.8rem; color:var(--muted); margin-bottom:10px;">
+        اضغط على أي منصة لفتح نافذة الدخول الآمنة على جوالك؛ سيلتقط التطبيق الجلسة تلقائياً ويشفرها في قاعدة البيانات:
+      </p>
+      <div class="platforms-grid">
+        <button class="plat-btn" onclick="linkPlatform('instagram')">📸 Instagram</button>
+        <button class="plat-btn" onclick="linkPlatform('facebook')">📘 Facebook</button>
+        <button class="plat-btn" onclick="linkPlatform('threads')">🧵 Threads</button>
+        <button class="plat-btn" onclick="linkPlatform('x_twitter')">🐦 X / Twitter</button>
+        <button class="plat-btn" onclick="linkPlatform('linkedin')">💼 LinkedIn</button>
+        <button class="plat-btn" onclick="linkPlatform('tiktok')">🎵 TikTok</button>
+        <button class="plat-btn" onclick="linkPlatform('youtube')">▶️ YouTube</button>
+        <button class="plat-btn" onclick="linkPlatform('telegram')">✈️ Telegram</button>
+        <button class="plat-btn" onclick="linkPlatform('bluesky')">🦋 Bluesky</button>
+        <button class="plat-btn" onclick="linkPlatform('reddit')">👽 Reddit</button>
+        <button class="plat-btn" onclick="linkPlatform('pinterest')">📌 Pinterest</button>
+        <button class="plat-btn" onclick="linkPlatform('mastodon')">🐘 Mastodon</button>
+      </div>
+      <div id="accountsList" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>⚡ حالة مزودات الذكاء الاصطناعي الـ 9 المجانية (Auto-Failover Router)</h3>
+      <div id="aiProvidersList">جاري الفحص...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🖥️ سجل النشاط الحي (Activity & Catch-Up Log)</h3>
+    <div id="logBox" class="log-box">Loading Nexus Social Automation v2.0...</div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('create', this)">🎬 الإنشاء</button>
+  <button class="nav-item" onclick="switchTab('queues', this)">📋 الطوابير</button>
+  <button class="nav-item" onclick="switchTab('inbox', this)">💬 التفاعل</button>
+  <button class="nav-item" onclick="switchTab('radar', this)">👁️ الرادار</button>
+  <button class="nav-item" onclick="switchTab('accounts', this)">🔗 حساباتي</button>
+</nav>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab_' + tab).classList.add('active');
+    btn.classList.add('active');
+    if (tab === 'queues') loadQueues();
+    if (tab === 'inbox') loadInbox();
+    if (tab === 'radar') loadTargets();
+    if (tab === 'accounts') { loadAccounts(); loadAIProviders(); }
+  }
+
+  async function refreshStatus() {
+    try {
+      const r = await fetch('/api/status');
+      const d = await r.json();
+      if (!d.ok) return;
+      document.getElementById('stAccounts').textContent = d.counts.active_accounts;
+      document.getElementById('stPending').textContent = d.counts.pending_posts;
+      document.getElementById('stInbox').textContent = d.counts.pending_inbox;
+      document.getElementById('stReplies').textContent = d.counts.queued_replies;
+
+      const badge = document.getElementById('netBadge');
+      badge.textContent = d.online ? 'متصل بالشبكة' : 'أوفلاين (وضع الحماية)';
+      badge.className = 'badge ' + (d.online ? 'online' : 'offline');
+
+      ['FULL_AUTO', 'SMART_HYBRID', 'APPROVAL_QUEUE'].forEach(m => {
+        const el = document.getElementById('mode_' + m);
+        if (el) el.classList.toggle('active', d.operation_mode === m);
+      });
+
+      document.getElementById('plannedSlots').innerHTML =
+        `Videos: ${(d.planned_today.videos || []).join(', ')}<br/>Posts : ${(d.planned_today.posts || []).join(', ')}`;
+
+      const logLines = (d.logs || []).map(l => `${l.ts.slice(11,19)} [${l.platform}] ${l.action}: ${l.detail}`);
+      document.getElementById('logBox').innerHTML = logLines.join('<br/>') || 'Ready.';
+    } catch (e) {}
+  }
+
+  async function setMode(mode) {
+    await fetch('/api/system/mode', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({mode})
+    });
+    refreshStatus();
+  }
+
+  async function triggerWakeup() {
+    await fetch('/api/system/wakeup', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({source: 'manual_dashboard_button'})
+    });
+    refreshStatus();
+  }
+
+  async function scheduleBatchPosts() {
+    const raw = document.getElementById('crTopics').value.trim();
+    if (!raw) return alert('أدخل موضوعاً واحداً على الأقل');
+    const topics = raw.split('\n').map(s => s.trim()).filter(Boolean);
+    await fetch('/api/posts/schedule', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        topics,
+        media_kind: document.getElementById('crMediaKind').value,
+        is_trial_reel: document.getElementById('crTrialReel').checked,
+        publish_now: document.getElementById('crPublishNow').checked
+      })
+    });
+    document.getElementById('crTopics').value = '';
+    refreshStatus();
+    alert('تمت الإضافة إلى الطابور وتنظيف النص من بصمة الذكاء الاصطناعي بنجاح!');
+  }
+
+  async function generateAutoVideo() {
+    const topic = document.getElementById('crTopics').value.split('\n')[0].trim() || 'التخطيط المالي وأتمتة المشاريع';
+    const r = await fetch('/api/media/auto-video', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        topic,
+        aspect_ratio: document.getElementById('crAspect').value,
+        avoid_women: document.getElementById('crAvoidWomen').checked
+      })
+    });
+    const d = await r.json();
+    refreshStatus();
+    alert(`تم تجهيز الفيديو!\nمحرك الصوت: ${d.tts_engine}\nمقاطع مرفوضة بفلتر المحتوى: ${d.avoid_women_rejected}`);
+  }
+
+  async function runSkillStudio() {
+    const skill = document.getElementById('skName').value;
+    const input = document.getElementById('skInput').value.trim();
+    if (!input) return alert('أدخل الفكرة أو النص أولاً');
+    const out = document.getElementById('skOutput');
+    out.style.display = 'block';
+    out.textContent = 'جاري التوليد عبر موزع الذكاء الاصطناعي المجاني...';
+    const r = await fetch('/api/skills/run', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({skill, input})
+    });
+    const d = await r.json();
+    out.textContent = `[المزود: ${d.provider} | درجة البشرية (/ig-human): ${d.humanizer_score}%]\n\n${d.content}`;
+  }
+
+  async function loadQueues() {
+    const r = await fetch('/api/queues');
+    const d = await r.json();
+    const box = document.getElementById('queueList');
+    if (!d.queue || !d.queue.length) { box.innerHTML = 'الطابور فارغ حالياً.'; return; }
+    box.innerHTML = d.queue.map(q => `
+      <div class="list-item">
+        <div style="display:flex; justify-content:space-between; font-weight:700;">
+          <span>[${q.platform}] @${q.username || 'account'} — ${q.status}</span>
+          <span>موعد: ${(q.due_at || '').slice(11,16)}</span>
+        </div>
+        <div style="color:#cbd5e1; margin:4px 0;">${q.text.slice(0, 140)}</div>
+        <div class="btn-row">
+          <button class="btn amber" style="padding:4px 8px; font-size:0.74rem;" onclick="queueAction('pause', ${q.id})">إيقاف مؤقت</button>
+          <button class="btn green" style="padding:4px 8px; font-size:0.74rem;" onclick="queueAction('resume', ${q.id})">استئناف</button>
+          <button class="btn" style="padding:4px 8px; font-size:0.74rem;" onclick="queueAction('retry', ${q.id})">إعادة المحاولة</button>
+          <button class="btn red" style="padding:4px 8px; font-size:0.74rem;" onclick="queueAction('delete', ${q.id})">حذف</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function queueAction(action, target_id) {
+    await fetch('/api/queues/action', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action, target_id})
+    });
+    loadQueues();
+    refreshStatus();
+  }
+
+  async function loadInbox() {
+    const r = await fetch('/api/inbox');
+    const d = await r.json();
+    const box = document.getElementById('inboxList');
+    if (!d.inbox || !d.inbox.length) { box.innerHTML = 'لا توجد رسائل أو تعليقات جديدة.'; return; }
+    box.innerHTML = d.inbox.map(item => `
+      <div class="list-item">
+        <div style="display:flex; justify-content:space-between; font-weight:700; color:#60a5fa;">
+          <span>[${item.platform}] @${item.sender_username} — تصنيف: ${item.category}</span>
+          <span>${item.status}</span>
+        </div>
+        <div style="margin:4px 0;">التعليق: "${item.incoming_text}"</div>
+        <div style="color:#34d399;">الرد المقترح: "${item.proposed_reply}"</div>
+        <div class="btn-row">
+          <button class="btn green" style="padding:4px 10px; font-size:0.75rem;" onclick="approveInbox(${item.id})">✅ موافقة وإرسال</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function approveInbox(id) {
+    await fetch('/api/inbox/approve', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id})
+    });
+    loadInbox();
+    refreshStatus();
+  }
+
+  async function saveReplyRule() {
+    await fetch('/api/reply-rules', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        keywords: document.getElementById('rlKeywords').value,
+        dm_link: document.getElementById('rlLink').value,
+        public_replies: document.getElementById('rlPublic').value,
+        dm_text: document.getElementById('rlDm').value
+      })
+    });
+    alert('تم حفظ قاعدة الرد التلقائي العربي (Comment-to-DM)!');
+  }
+
+  async function addTarget() {
+    const handle = document.getElementById('tgHandle').value.trim();
+    if (!handle) return;
+    await fetch('/api/targets', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        platform: document.getElementById('tgPlatform').value,
+        target_handle: handle
+      })
+    });
+    document.getElementById('tgHandle').value = '';
+    loadTargets();
+  }
+
+  async function scanTargetsNow() {
+    await fetch('/api/targets/scan', {method: 'POST'});
+    loadTargets();
+    refreshStatus();
+  }
+
+  async function loadTargets() {
+    const r = await fetch('/api/targets');
+    const d = await r.json();
+    const box = document.getElementById('radarList');
+    if (!d.comment_queue || !d.comment_queue.length) { return; }
+    box.innerHTML = d.comment_queue.map(c => `
+      <div class="list-item">
+        <div style="display:flex; justify-content:space-between; font-weight:700;">
+          <span>[${c.platform}] @${c.target_username}</span>
+          <span style="color:#f59e0b;">مضاعف الانتشار: ${c.outlier_multiplier}x</span>
+        </div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin:4px 0;">البوست: ${(c.post_text || '').slice(0, 120)}</div>
+        <div style="color:#38bdf8;">تعليق (/ig-comment) المقترح: "${c.proposed_comment}"</div>
+      </div>
+    `).join('');
+  }
+
+  function linkPlatform(platform) {
+    if (window.AndroidSessionBridge && window.AndroidSessionBridge.openPlatformLogin) {
+      window.AndroidSessionBridge.openPlatformLogin(platform);
+    } else {
+      const username = prompt(`أدخل اسم حسابك على ${platform} لربطه السريع:`);
+      if (!username) return;
+      const tokenOrCookie = prompt(`أدخل Session Cookie أو Access Token لحساب ${username} (أو اتركه ليتم التقاطه من تطبيق الـ APK):`) || 'captured_session_token';
+      fetch('/api/accounts/capture-session', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({platform, username, cookie_string: `sessionid=${tokenOrCookie}`})
+      }).then(() => { loadAccounts(); refreshStatus(); });
+    }
+  }
+
+  async function loadAccounts() {
+    const r = await fetch('/api/accounts');
+    const d = await r.json();
+    const box = document.getElementById('accountsList');
+    box.innerHTML = (d.accounts || []).map(a => `
+      <div class="list-item" style="display:flex; justify-content:space-between;">
+        <span>✅ <strong>${a.platform.toUpperCase()}</strong> — @${a.username} (${a.auth_method})</span>
+        <span style="color:#34d399;">نشط</span>
+      </div>
+    `).join('') || 'لم يتم ربط حسابات بعد؛ اضغط على أي منصة بالأعلى.';
+  }
+
+  async function loadAIProviders() {
+    const r = await fetch('/api/ai-providers');
+    const d = await r.json();
+    const box = document.getElementById('aiProvidersList');
+    box.innerHTML = (d.providers || []).map(p => `
+      <div class="list-item" style="display:flex; justify-content:space-between;">
+        <span>${p.configured ? '🟢' : '⚪'} <strong>${p.label}</strong></span>
+        <span style="font-size:0.78rem; color:#94a3b8;">نجاح: ${p.success_count} | سرعة: ${p.avg_latency_ms}ms</span>
+      </div>
+    `).join('');
+  }
+
+  refreshStatus();
+  setInterval(refreshStatus, 10000);
+</script>
+</body>
+</html>

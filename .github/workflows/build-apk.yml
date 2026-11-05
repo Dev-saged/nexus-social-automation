@@ -20,15 +20,66 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept Android SDK Licenses & Build Debug APK
+      - name: Normalize Pure Android SDK Config & Build APK with Gradle 8.7
         working-directory: ./android-apk
         run: |
           export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           export ANDROID_SDK_ROOT="$ANDROID_HOME"
+
+          # 1. Self-heal Java & Manifest files to Pure Android SDK (Zero AndroidX Constraint Mutation bugs)
+          sed -i 's/import androidx.appcompat.app.AppCompatActivity;/import android.app.Activity;/g' app/src/main/java/com/devsaged/nexussocial/*.java
+          sed -i 's/extends AppCompatActivity/extends Activity/g' app/src/main/java/com/devsaged/nexussocial/*.java
+          sed -i 's/@style\/Theme.AppCompat.NoActionBar/@android:style\/Theme.DeviceDefault.NoActionBar/g' app/src/main/AndroidManifest.xml
+
+          cat > build.gradle << 'EOF'
+          plugins {
+              id 'com.android.application' version '8.4.2' apply false
+          }
+          EOF
+
+          cat > gradle.properties << 'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          EOF
+
+          cat > app/build.gradle << 'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.devsaged.nexussocial'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.devsaged.nexussocial"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 21
+                  versionName "2.0.1"
+              }
+              buildTypes {
+                  release { minifyEnabled false }
+                  debug {
+                      applicationIdSuffix ".debug"
+                      versionNameSuffix "-debug"
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          dependencies {
+          }
+          EOF
+
+          # 2. Download exact Gradle 8.7 (instead of Ubuntu 26.04's incompatible Gradle 9.8.2)
+          curl -sSL https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle-8.7.zip
+          unzip -q -o /tmp/gradle-8.7.zip -d /tmp
+
+          # 3. Accept SDK licenses and compile APK
           if [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
           fi
-          gradle assembleDebug --no-daemon --stacktrace
+          /tmp/gradle-8.7/bin/gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload Compiled Nexus Social APK Artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Social — بانتظار محرك Termux</title>
+  <style>
+    body { background:#0b0f19; color:#f8fafc; font-family:sans-serif; text-align:center; padding:40px 20px; }
+    .box { background:#131b2e; border:1px solid #1e293b; border-radius:16px; padding:24px; max-width:440px; margin:0 auto; }
+    h2 { color:#60a5fa; margin-bottom:12px; }
+    p { color:#94a3b8; font-size:0.9rem; line-height:1.6; margin-bottom:16px; }
+    code { display:block; background:#050811; color:#34d399; padding:12px; border-radius:8px; direction:ltr; margin-bottom:16px; }
+    button { background:#3b82f6; color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; width:100%; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🚀 محرك Nexus Social في Termux</h2>
+    <p>لتشغيل الخادم المحلي على جوالك (أو تفعيل التشغيل التلقائي عند فتح الهاتف)، شغّل الأمر التالي في Termux:</p>
+    <code>bash ~/nexus-social-automation/scripts/start_termux.sh</code>
+    <button onclick="if(window.AndroidSessionBridge) window.AndroidSessionBridge.retryLocalServer(); else location.href='http://127.0.0.1:5050';">
+      🔄 إعادة الاتصال بالمحرك المحلي الآن
+    </button>
+  </div>
+</body>
+</html>

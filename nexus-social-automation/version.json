@@ -1,0 +1,8 @@
+{
+  "name": "nexus-social-automation",
+  "version": "2.0.0",
+  "author": "Dev-saged",
+  "platforms_count": 12,
+  "ai_providers_count": 9,
+  "architecture": "Android Java WebView APK + Termux Python Offline-First Core"
+}
